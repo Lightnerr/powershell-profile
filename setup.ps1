@@ -1,3 +1,6 @@
+$profileUrl = "https://raw.githubusercontent.com/Lightnerr/powershell-profile/main/Microsoft.PowerShell_profile.ps1"
+$fontName = "GeistMono"
+
 # Ensure the script can run with elevated privileges
 if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
     Write-Warning "Please run this script as an Administrator!"
@@ -26,7 +29,7 @@ if (!(Test-Path -Path $PROFILE -PathType Leaf)) {
     try {
         # Detect Version of PowerShell & Create Profile directories if they do not exist.
         $profilePath = ""
-        if ($PSVersionTable.PSEdition -eq "Core") { 
+        if ($PSVersionTable.PSEdition -eq "Core") {
             $profilePath = "$env:userprofile\Documents\Powershell"
         }
         elseif ($PSVersionTable.PSEdition -eq "Desktop") {
@@ -37,7 +40,7 @@ if (!(Test-Path -Path $PROFILE -PathType Leaf)) {
             New-Item -Path $profilePath -ItemType "directory"
         }
 
-        Invoke-RestMethod https://github.com/ChrisTitusTech/powershell-profile/raw/main/Microsoft.PowerShell_profile.ps1 -OutFile $PROFILE
+        Invoke-RestMethod $profileUrl -OutFile $PROFILE
         Write-Host "The profile @ [$PROFILE] has been created."
         Write-Host "If you want to add any persistent components, please do so at [$profilePath\Profile.ps1] as there is an updater in the installed profile which uses the hash to update the profile and will lead to loss of changes"
     }
@@ -48,7 +51,7 @@ if (!(Test-Path -Path $PROFILE -PathType Leaf)) {
 else {
     try {
         Get-Item -Path $PROFILE | Move-Item -Destination "oldprofile.ps1" -Force
-        Invoke-RestMethod https://github.com/ChrisTitusTech/powershell-profile/raw/main/Microsoft.PowerShell_profile.ps1 -OutFile $PROFILE
+        Invoke-RestMethod $profileUrl -OutFile $PROFILE
         Write-Host "The profile @ [$PROFILE] has been created and old profile removed."
         Write-Host "Please back up any persistent components of your old profile to [$HOME\Documents\PowerShell\Profile.ps1] as there is an updater in the installed profile which uses the hash to update the profile and will lead to loss of changes"
     }
@@ -70,24 +73,27 @@ try {
     [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
     $fontFamilies = (New-Object System.Drawing.Text.InstalledFontCollection).Families.Name
 
-    if ($fontFamilies -notcontains "CaskaydiaCove NF") {
+    if ($fontFamilies -notcontains "$fontName NF") {
         $webClient = New-Object System.Net.WebClient
-        $webClient.DownloadFileAsync((New-Object System.Uri("https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/CascadiaCode.zip")), ".\CascadiaCode.zip")
-        
+        $webClient.DownloadFileAsync((New-Object System.Uri("https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/$fontName.zip")), ".\$fontName.zip")
+
         while ($webClient.IsBusy) {
             Start-Sleep -Seconds 2
         }
 
-        Expand-Archive -Path ".\CascadiaCode.zip" -DestinationPath ".\CascadiaCode" -Force
+        Expand-Archive -Path ".\$fontName.zip" -DestinationPath ".\$fontName" -Force
         $destination = (New-Object -ComObject Shell.Application).Namespace(0x14)
-        Get-ChildItem -Path ".\CascadiaCode" -Recurse -Filter "*.ttf" | ForEach-Object {
-            If (-not(Test-Path "C:\Windows\Fonts\$($_.Name)")) {        
+        Get-ChildItem -Path ".\$fontName" -Recurse -Filter "*.ttf", "*.otf" | ForEach-Object {
+            If (-not(Test-Path "C:\Windows\Fonts\$($_.Name)")) {
                 $destination.CopyHere($_.FullName, 0x10)
             }
         }
 
-        Remove-Item -Path ".\CascadiaCode" -Recurse -Force
-        Remove-Item -Path ".\CascadiaCode.zip" -Force
+        Remove-Item -Path ".\$fontName" -Recurse -Force
+        Remove-Item -Path ".\$fontName.zip" -Force
+    }
+    else {
+        Write-Host "The font $fontName NF is already installed."
     }
 }
 catch {
@@ -95,9 +101,10 @@ catch {
 }
 
 # Final check and message to the user
-if ((Test-Path -Path $PROFILE) -and (winget list --name "OhMyPosh" -e) -and ($fontFamilies -contains "CaskaydiaCove NF")) {
+if ((Test-Path -Path $PROFILE) -and (winget list --name "OhMyPosh" -e) -and ($fontFamilies -contains "$fontName NF")) {
     Write-Host "Setup completed successfully. Please restart your PowerShell session to apply changes."
-} else {
+}
+else {
     Write-Warning "Setup completed with errors. Please check the error messages above."
 }
 
@@ -116,6 +123,15 @@ try {
 catch {
     Write-Error "Failed to install Terminal Icons module. Error: $_"
 }
+
+# powershell install
+try {
+    winget install -e --id Microsoft.PowerShell
+}
+catch {
+    Write-Error "Failed to install PowerShell. Error: $_"
+}
+
 # zoxide Install
 try {
     winget install -e --id ajeetdsouza.zoxide
