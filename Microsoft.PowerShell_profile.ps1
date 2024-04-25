@@ -89,21 +89,12 @@ function Test-CommandExists {
     return $exists
 }
 
-# Editor Configuration
-$EDITOR = if (Test-CommandExists nvim) { 'nvim' }
-elseif (Test-CommandExists pvim) { 'pvim' }
-elseif (Test-CommandExists vim) { 'vim' }
-elseif (Test-CommandExists vi) { 'vi' }
-elseif (Test-CommandExists code) { 'code' }
-elseif (Test-CommandExists notepad++) { 'notepad++' }
-elseif (Test-CommandExists sublime_text) { 'sublime_text' }
-else { 'notepad' }
-Set-Alias -Name vim -Value $EDITOR
-
 function Edit-Profile {
     vim $PROFILE.CurrentUserAllHosts
 }
+
 function touch($file) { "" | Out-File $file -Encoding ASCII }
+
 function ff($name) {
     Get-ChildItem -recurse -filter "*${name}*" -ErrorAction SilentlyContinue | ForEach-Object {
         Write-Output "$($_.directory)\$($_)"
@@ -195,8 +186,7 @@ function ep { vim $PROFILE }
 function k9 { Stop-Process -Name $args[0] }
 
 # Enhanced Listing
-function la { Get-ChildItem -Path . -Force | Format-Table -AutoSize }
-function ll { Get-ChildItem -Path . -Force -Hidden | Format-Table -AutoSize }
+function ll { Get-ChildItem -Path . -Force | Format-Table -AutoSize }
 
 # Git Shortcuts
 function gs { git status }
@@ -218,6 +208,9 @@ function lazyg {
     git commit -m "$args"
     git push
 }
+
+# Replace cd with zoxide
+function cd { z $args }
 
 # Quick Access to System Information
 function sysinfo { Get-ComputerInfo }
