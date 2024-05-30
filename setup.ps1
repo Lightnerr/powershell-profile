@@ -60,6 +60,14 @@ else {
     }
 }
 
+# Bat Cat Install
+try {
+    winget install -e --accept-source-agreements --accept-package-agreements sharkdp.bat
+}
+catch {
+    Write-Error "Failed to install Bat Cat. Error: $_"
+}
+
 # OMP Install
 try {
     winget install -e --accept-source-agreements --accept-package-agreements JanDeDobbeleer.OhMyPosh

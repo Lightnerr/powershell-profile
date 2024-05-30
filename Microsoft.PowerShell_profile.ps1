@@ -39,7 +39,11 @@ function Update-Profile {
         Remove-Item "$env:temp/Microsoft.PowerShell_profile.ps1" -ErrorAction SilentlyContinue
     }
 }
+
 Update-Profile
+
+# SET ENVIRONMENT VARIABLES
+$ENV:OTEL_EXPORTER_OTLP_ENDPOINT = "http://localhost:4318"
 
 function Update-PowerShell {
     if (-not $global:canConnectToGitHub) {
@@ -222,6 +226,9 @@ function flushdns { Clear-DnsClientCache }
 function cpy { Set-Clipboard $args[0] }
 
 function pst { Get-Clipboard }
+
+# Cat
+function cat { bat $args }
 
 # Enhanced PowerShell Experience
 Set-PSReadLineOption -Colors @{
