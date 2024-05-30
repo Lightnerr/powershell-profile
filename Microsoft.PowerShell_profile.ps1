@@ -227,9 +227,6 @@ function cpy { Set-Clipboard $args[0] }
 
 function pst { Get-Clipboard }
 
-# Cat
-function cat { bat $args }
-
 # Enhanced PowerShell Experience
 Set-PSReadLineOption -Colors @{
     Command   = 'Yellow'
