@@ -42,9 +42,6 @@ function Update-Profile {
 
 Update-Profile
 
-# SET ENVIRONMENT VARIABLES
-$ENV:OTEL_EXPORTER_OTLP_ENDPOINT = "http://localhost:4318"
-
 function Update-PowerShell {
     if (-not $global:canConnectToGitHub) {
         Write-Host "Skipping PowerShell update check due to GitHub.com not responding within 1 second." -ForegroundColor Yellow
@@ -93,10 +90,6 @@ function Test-CommandExists {
     return $exists
 }
 
-function Edit-Profile {
-    vim $PROFILE.CurrentUserAllHosts
-}
-
 function touch($file) { "" | Out-File $file -Encoding ASCII }
 
 function ff($name) {
@@ -140,24 +133,8 @@ function df {
     get-volume
 }
 
-function sed($file, $find, $replace) {
-    (Get-Content $file).replace("$find", $replace) | Set-Content $file
-}
-
-function which($name) {
-    Get-Command $name | Select-Object -ExpandProperty Definition
-}
-
 function export($name, $value) {
     set-item -force -path "env:$name" -value $value;
-}
-
-function pkill($name) {
-    Get-Process $name -ErrorAction SilentlyContinue | Stop-Process
-}
-
-function pgrep($name) {
-    Get-Process $name
 }
 
 function head {
@@ -171,23 +148,11 @@ function tail {
 }
 
 # Quick File Creation
-function nf { param($name) New-Item -ItemType "file" -Path . -Name $name }
 
 # Directory Management
 function mkcd { param($dir) mkdir $dir -Force; Set-Location $dir }
 
 ### Quality of Life Aliases
-
-# Navigation Shortcuts
-function docs { Set-Location -Path $HOME\Documents }
-
-function dtop { Set-Location -Path $HOME\Desktop }
-
-# Quick Access to Editing the Profile
-function ep { vim $PROFILE }
-
-# Simplified Process Management
-function k9 { Stop-Process -Name $args[0] }
 
 # Enhanced Listing
 function ll { Get-ChildItem -Path . -Force | Format-Table -AutoSize }
@@ -200,8 +165,6 @@ function ga { git add . }
 function gc { param($m) git commit -m "$m" }
 
 function gp { git push }
-
-function g { z Github }
 
 function gcom {
     git add .
@@ -219,13 +182,15 @@ function cd { z $args }
 # Quick Access to System Information
 function sysinfo { Get-ComputerInfo }
 
-# Networking Utilities
-function flushdns { Clear-DnsClientCache }
+function gush {
+    git fetch -p
+    git merge origin/master
+    git push
+}
 
-# Clipboard Utilities
-function cpy { Set-Clipboard $args[0] }
-
-function pst { Get-Clipboard }
+function cleanbin {
+    Get-ChildItem .\ -include bin, obj -Recurse | ForEach-Object ($_) { remove-item $_.fullname -Force -Recurse }
+}
 
 # Enhanced PowerShell Experience
 Set-PSReadLineOption -Colors @{
